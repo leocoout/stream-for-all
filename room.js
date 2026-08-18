@@ -16,7 +16,7 @@ import { BgPattern } from "./components/BgPattern.js";
 import { FooterMeta } from "./components/FooterMeta.js";
 import { toast } from "./components/Toast.js";
 import { renderDevPanel } from "./components/DevPanel.js";
-import { saveGroup, createHostGroup, joinFromInvite } from "./groups.js";
+import { loadGroups, saveGroup, createHostGroup, joinFromInvite } from "./groups.js";
 import { MOCK_NAMES, MOCK_COLORS, MOCK_PRESETS, installChromeStub, clampScene, mockStream } from "./mock.js";
 import { T } from "./strings.js";
 import { LINKS } from "./config.js";
@@ -96,6 +96,14 @@ async function init() {
     return;
   }
   id = await loadIdentity();
+  const preGroup = params.get("g");
+  if (preGroup) {
+    const groups = await loadGroups();
+    if (groups[preGroup]) {
+      enterGroup(groups[preGroup]);
+      return;
+    }
+  }
   const onboard = Onboarding(el("onboard"), {
     initialName: id.name || "",
     startInvite: params.get("join") || null,

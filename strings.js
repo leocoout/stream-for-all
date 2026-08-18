@@ -1,9 +1,5 @@
 export const T = {
   appName: "Stream for All",
-  popup: {
-    tagline: "Compartilhamento de tela privado para a sua turma — crie ou entre em uma sala em segundos.",
-    start: "Começar transmissão"
-  },
   onboarding: {
     nickname: "Apelido",
     nicknamePlaceholder: "ex: leo",
