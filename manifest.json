@@ -1,21 +1,32 @@
 {
   "manifest_version": 3,
   "name": "Stream for All",
-  "version": "0.6.0",
-  "description": "Private peer-to-peer screen sharing rooms for your crew",
-  "permissions": ["storage", "activeTab"],
+  "version": "1.0.0",
+  "description": "Companion extension for Discord: private P2P screen-sharing rooms. Safely stream your screen to friends in your server.",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
   "background": {
     "service_worker": "background.js"
   },
-  "content_scripts": [
-    {
-      "matches": ["https://leocoout.github.io/stream-for-all/*"],
-      "js": ["landing.js"],
-      "run_at": "document_start"
-    }
-  ],
+  "externally_connectable": {
+    "matches": [
+      "https://leocoout.github.io/*"
+    ]
+  },
+  "icons": {
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Stream for All"
+    "default_title": "Stream for All",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
   }
 }

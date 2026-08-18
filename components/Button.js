@@ -4,11 +4,11 @@ const VARIANTS = {
   ghost: { background: "transparent", color: "var(--muted-fg)", border: "1px solid transparent" }
 };
 
-export function Button(label, { variant = "primary", onClick, full = true, disabled = false } = {}) {
+export function Button(label, { variant = "primary", onClick, disabled = false } = {}) {
   const b = document.createElement("button");
   b.textContent = label;
   Object.assign(b.style, {
-    width: full ? "100%" : "auto",
+    width: "100%",
     padding: "11px 16px",
     borderRadius: "var(--radius)",
     fontSize: "14px",

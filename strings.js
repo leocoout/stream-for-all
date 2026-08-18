@@ -38,7 +38,6 @@ export const T = {
     approve: "Aprovar",
     clickToWatch: "Clique para assistir",
     stopWatching: "Clique para parar de assistir",
-    watch: "Assistir",
     live: "Ao vivo",
     host: "Anfitrião",
     ping: (ms) => `${ms} ms`,

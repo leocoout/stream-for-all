@@ -1,4 +1,4 @@
-chrome.runtime.onMessage.addListener((msg) => {
+chrome.runtime.onMessageExternal.addListener((msg, sender, sendResponse) => {
   if (msg && msg.type === "sfa-open" && typeof msg.join === "string" && msg.join) {
     chrome.windows.create({
       url: chrome.runtime.getURL("room.html?join=" + encodeURIComponent(msg.join)),
@@ -7,4 +7,5 @@ chrome.runtime.onMessage.addListener((msg) => {
       height: 620
     });
   }
+  sendResponse({ installed: true });
 });

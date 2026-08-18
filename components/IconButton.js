@@ -1,16 +1,16 @@
 import { Icon } from "./icons.js";
 
-export function IconButton(iconName, { size = 18, title = "", onClick, active = false } = {}) {
+export function IconButton(iconName, { size = 18, title = "", onClick } = {}) {
   const b = document.createElement("button");
   b.type = "button";
   b.style.position = "relative";
-  let icon = Icon(iconName, { size });
+  const icon = Icon(iconName, { size });
   b.appendChild(icon);
   if (title) b.title = title;
 
   const base = () => {
-    b.style.color = active ? "var(--fg)" : "var(--muted-fg)";
-    b.style.background = active ? "var(--secondary)" : "transparent";
+    b.style.color = "var(--muted-fg)";
+    b.style.background = "transparent";
     b.style.borderColor = "var(--border)";
   };
   Object.assign(b.style, {
@@ -35,9 +35,6 @@ export function IconButton(iconName, { size = 18, title = "", onClick, active = 
     if (n > 0) { badge.textContent = n; badge.style.display = "flex"; }
     else badge.style.display = "none";
   };
-  b.setActive = (on) => { active = on; base(); };
-  b.setIcon = (name) => { const n = Icon(name, { size }); b.replaceChild(n, icon); icon = n; };
-
   if (onClick) b.onclick = (e) => { e.stopPropagation(); onClick(e, b); };
   return b;
 }

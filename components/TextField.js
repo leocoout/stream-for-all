@@ -1,4 +1,4 @@
-export function TextField({ placeholder = "", value = "", center = false, mono = false, onInput, onEnter } = {}) {
+export function TextField({ placeholder = "", value = "", mono = false, onInput, onEnter } = {}) {
   const input = document.createElement("input");
   input.placeholder = placeholder;
   input.value = value;
@@ -12,7 +12,7 @@ export function TextField({ placeholder = "", value = "", center = false, mono =
     fontSize: "14px",
     fontFamily: mono ? "var(--font-mono)" : "var(--font-sans)",
     outline: "none",
-    textAlign: center ? "center" : "left",
+    textAlign: "left",
     transition: "border-color .15s ease"
   });
   input.onfocus = () => (input.style.borderColor = "var(--ring)");

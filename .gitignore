@@ -1,10 +1,6 @@
 node_modules/
 .env
 .env.*
-!.env.template
-.dev.vars
-.dev.vars.*
-!.dev.vars.example
-.wrangler/
 .DS_Store
 *.zip
+release/

@@ -2,7 +2,7 @@ import { Icon } from "./icons.js";
 
 let current = null;
 
-export function closeMenu() {
+function closeMenu() {
   if (!current) return;
   document.removeEventListener("click", current._onDoc, true);
   current.remove();
@@ -59,7 +59,7 @@ export function openMenu(anchor, itemsOrBuilder) {
     Object.assign(row.style, {
       display: "flex", alignItems: "center", gap: "9px", width: "100%",
       padding: "8px 10px", border: "none", background: "transparent",
-      color: it.danger ? "var(--destructive)" : "var(--fg)",
+      color: "var(--fg)",
       fontSize: "13px", fontWeight: "500", cursor: "pointer",
       borderRadius: "var(--radius-sm)", fontFamily: "var(--font-sans)", textAlign: "left"
     });

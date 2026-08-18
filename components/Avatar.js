@@ -25,11 +25,9 @@ export function Avatar({ initial = "?", color = "#4ea1ff", size = 92 } = {}) {
     color: "#0b0c0e",
     fontSize: Math.round(size * 0.42) + "px",
     fontWeight: "700",
-    userSelect: "none",
-    transition: "background .25s ease"
+    userSelect: "none"
   });
   el.textContent = (initial || "?").toUpperCase();
   el.setInitial = (v) => (el.textContent = (v || "?").toUpperCase());
-  el.setColor = (c) => (el.style.background = c);
   return el;
 }

@@ -3,12 +3,12 @@ const dec = new TextDecoder();
 const SIGN_ALGO = { name: "ECDSA", namedCurve: "P-256" };
 const SIGN_OP = { name: "ECDSA", hash: "SHA-256" };
 
-export function b64u(buf) {
+function b64u(buf) {
   return btoa(String.fromCharCode(...new Uint8Array(buf)))
     .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-export function ub64u(str) {
+function ub64u(str) {
   str = str.replace(/-/g, "+").replace(/_/g, "/");
   return Uint8Array.from(atob(str), (c) => c.charCodeAt(0));
 }
@@ -66,6 +66,12 @@ export async function makeEntry(id, groupId, type, pub, name) {
 export function mergeEntries(a, b) {
   const seen = new Set(a.map((e) => e.sig));
   return a.concat(b.filter((e) => e && e.sig && !seen.has(e.sig)));
+}
+
+export async function verifyEntry(e, founderPub) {
+  if (!e || e.by !== founderPub || !e.sig) return false;
+  if (e.type !== "add" && e.type !== "remove") return false;
+  return verifyStr(e.by, entryStr(e), e.sig);
 }
 
 export async function computeMembers(group) {

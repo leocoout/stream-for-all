@@ -3,7 +3,7 @@ import { T } from "../strings.js";
 
 let current = null;
 
-export function closeSheet() {
+function closeSheet() {
   if (!current) return;
   current.remove();
   current = null;
