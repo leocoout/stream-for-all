@@ -1,55 +1,91 @@
 # Stream for All
 
-Your own screen sharing system, launched from Discord. A floating button on discord.com opens a room where your friend group connects peer-to-peer over WebRTC — anyone shares their screen at 1080p60 / 10 Mbps and everyone sees all streams in a grid.
+Stream for All is a Chrome extension. It creates private screen sharing rooms for a small group. Members connect directly to each other with WebRTC. No server stores the video.
 
-No server, no bot, no passwords, no platform account that anyone can ban. Membership is enforced by cryptography: each install holds a private key, a group is a signed list of member keys, and peers prove key ownership before any video flows. Discord is used only as the place you paste invite links — nothing in the system depends on it.
+You organize the group in any chat, such as Discord. You share an invite link there. The extension does the rest.
 
-## Install (you and your friends)
+## Features
 
-1. Get this folder (zip with `make zip`, or send the folder); unzip somewhere permanent
-2. `chrome://extensions` → **Developer mode** → **Load unpacked** → select the folder
-3. Open https://discord.com/app
+- Screen sharing at up to 1080p and 60 fps.
+- Opt-in watching. You choose which live stream to open.
+- Host approval. The host admits each new member.
+- Picture-in-picture. You open any stream in a separate window.
+- Viewer list. You see who watches each stream.
+- Notification sounds for join, leave, and stream events.
+- Brazilian Portuguese interface.
+
+## Install
+
+1. Download this folder. Unzip it to a permanent location.
+2. Open `chrome://extensions`.
+3. Turn on Developer mode.
+4. Click Load unpacked. Select the folder.
+
+Each friend installs the extension the same way.
 
 ## Use
 
-**Create a group (once):**
-1. Click the floating **🖥️ Stream for All** button — the room page opens
-2. Enter your name, name the group, click **Create group**
-3. Click **📋 Copy invite link** and paste it into your Discord channel
+Click the extension icon in the toolbar. Click Start streaming. A small window opens.
 
-**Friends join:**
-1. They install the extension, click the invite link (or paste it in the room page)
-2. They appear under **Wants to join** on any online member's screen — click **Approve**
-3. Once approved they're a member; **🖥️ Share my screen** works for everyone
+Enter a nickname. Then choose one option:
 
-Each Discord server maps to its own group automatically after the first time — clicking the button from that server reopens the same group.
+- Host a room. The extension creates a room. It shows an invite link. Copy the link and send it to your friends.
+- Enter with code. Paste the invite code that a friend sent you.
 
-## Security model
+To share your screen, click Share screen. Pick a screen or window. Other members see your name in the Live now list. They click Watch to open your stream.
 
-- **Identity**: every install generates an ECDSA P-256 keypair, stored locally in the browser. The public key is your member ID.
-- **Membership**: a group is an append-only, signed roster rooting at the founder's key. Adding a member = an existing member signs a new entry; removing = the founder signs a revocation. Rosters gossip between peers automatically.
-- **Admission**: before streams are exchanged, peers run a signed challenge-response (a fresh random nonce each time) proving they hold a private key that's on the roster. Streams are only sent to, and only rendered from, verified members.
-- **Why this is safe to open-source**: there are no secrets in the code. Security rests entirely on each person's local private key. Invite links carry only public data, so a leaked/screenshotted invite can't be used without a member clicking Approve.
-- **Revocation**: the founder clicks **Remove**; the signed revocation gossips and honest peers immediately stop streaming to that key. No manual key rotation, no re-inviting everyone.
-- **Nothing to ban**: signaling rides public Nostr relays (via the bundled Trystero) and video is peer-to-peer. No Discord bot, no OAuth app, no backend of ours.
+The host admits each new member. Open the requests from the header button. Click Approve.
 
-Known limits (fine at friends scale): any member can approve a newcomer (not founder-only); a leaked invite link + a careless Approve click lets someone in until removed; tile names are self-asserted but the underlying key identity is not.
+## Invite links
 
-## Files
+The host copies an invite link. The link points to a landing page.
 
-- `ui.js` — the launcher button on discord.com (passes the current server as context)
-- `room.html` / `room.js` — group management, the crypto handshake, and the WebRTC mesh
-- `crypto.js` — identity, signed roster, invite encoding
-- `trystero-nostr.min.js` — bundled Trystero (serverless WebRTC signaling over Nostr relays)
-- `verifier/` — **optional, not wired in.** A Cloudflare Worker for groups that additionally want provable "currently in this voice channel" enforcement via their own Discord bot. Ignore it unless you want that stricter check later.
+- If your friend has the extension, the link opens the room.
+- If your friend does not have the extension, the link opens the install page.
 
-## Release
+The invite code also works on its own. A friend pastes it in the Enter with code screen.
 
-```bash
-make zip     # builds stream-for-all-<version>.zip with just the extension files
-```
+You host the landing page yourself. The default page is at `https://leocoout.github.io/stream-for-all`. Set the address in `config.js`.
 
-## Tweaks
+## Security
 
-- Quality: `MAX_BITRATE` and the `getDisplayMedia` constraints in `room.js`
-- If two friends behind strict NATs can't connect, add a TURN server via Trystero's `rtcConfig` in `joinRoom`
+- Identity. Each install generates an ECDSA P-256 key pair. The extension stores it in the browser. Your public key is your member ID.
+- Membership. A group is a signed list of member keys. The list roots at the host key. The host signs each add and each remove. The list syncs between peers.
+- Admission. Peers prove key ownership before any video flows. Each peer signs a fresh random challenge. The extension sends a stream only to a verified member. It renders a stream only from a verified member.
+- Revocation. The host removes a member with one click. The signed removal syncs. Peers stop sending video to that key.
+- No backend. Signaling runs over public Nostr relays through the bundled Trystero library. Video runs peer to peer. There is no bot, no login server, and no database.
+
+The code is open source and holds no secrets. The security rests on each person's private key.
+
+Invite links and codes are semi-private. They carry the room password. A person with the link reaches the signaling lobby. That person cannot see a stream without host approval.
+
+Run the security tests with `make test`. The tests try to forge membership, impersonate members, tamper entries, and spam the roster.
+
+## Project structure
+
+- `manifest.json`: the extension manifest (Manifest V3).
+- `popup.html`, `popup.js`: the toolbar popup with the Start button.
+- `background.js`: the service worker that opens a room from an invite link.
+- `room.html`, `room.js`: onboarding, membership, and the WebRTC mesh.
+- `onboarding.js`: the nickname, host, and join steps.
+- `crypto.js`: identity, the signed roster, and invite codes.
+- `groups.js`: group storage.
+- `streamQuality.js`: resolution, frame rate, and bitrate.
+- `videoGrid.js`: the video tile lifecycle.
+- `mock.js`: data and helpers for the mock preview.
+- `sounds.js`: notification sounds.
+- `strings.js`: the user-facing text in Brazilian Portuguese.
+- `config.js`: the landing page address.
+- `tokens.css`: the design tokens.
+- `components/`: the visual components. One component per file (rule R001).
+- `trystero-nostr.min.js`: the bundled Trystero library.
+
+## Build and test
+
+- `make zip` builds the extension zip in `release/`.
+- `make test` runs the security tests.
+- `make local` serves the pages for a local preview. Open `room.html?mock=1` to preview the room with mock data.
+
+## License
+
+Stream for All uses the MIT license. See `LICENSE`.
