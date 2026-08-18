@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="images/logo_icon.png" alt="Stream for All logo" width="110" />
+</p>
+
 # Stream for All
 
 Stream for All is a Chrome extension. It creates private screen sharing rooms for a small group. Members connect directly to each other with WebRTC. No server stores the video.
