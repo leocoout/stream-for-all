@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Stream for All",
+  "version": "0.6.0",
+  "description": "Private peer-to-peer screen sharing rooms for your crew",
+  "permissions": ["storage", "activeTab"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://leocoout.github.io/stream-for-all/*"],
+      "js": ["landing.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Stream for All"
+  }
+}
