@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Stream for All",
   "version": "1.0.0",
-  "description": "Companion extension for Discord: private P2P screen-sharing rooms. Safely stream your screen to friends in your server.",
+  "description": "Private P2P screen-sharing rooms. Safely stream your screen to friends in your server, with no media servers in between.",
   "permissions": [
     "storage",
     "activeTab"
