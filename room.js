@@ -34,9 +34,9 @@ const RELAYS = [
   "wss://relay.primal.net",
   "wss://nostr.mom",
   "wss://relay.nostr.net",
-  "wss://nostr.land",
-  "wss://nostr21.com",
-  "wss://nostr-pub.wellorder.net"
+  "wss://nostr-pub.wellorder.net",
+  "wss://nostr.data.haus",
+  "wss://nostr.vulpem.com"
 ];
 
 const el = (id) => document.getElementById(id);
