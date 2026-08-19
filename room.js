@@ -106,9 +106,12 @@ async function init() {
       return;
     }
   }
+  const groups = await loadGroups();
   const onboard = Onboarding(el("onboard"), {
     initialName: id.name || "",
     startInvite: params.get("join") || null,
+    rooms: Object.values(groups).map((g) => ({ groupId: g.groupId, name: g.name })),
+    onEnterRoom: (gid) => { if (groups[gid]) enterGroup(groups[gid]); },
     onNickname: (name) => setName(name),
     onHost: async (name) => {
       await setName(name);
@@ -127,7 +130,7 @@ async function init() {
       enterGroup(g);
     }
   });
-  onboard.nickname();
+  onboard.start();
 }
 
 async function setName(name) {

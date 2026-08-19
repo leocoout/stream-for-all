@@ -5,6 +5,7 @@ export const T = {
     nicknamePlaceholder: "ex: leo",
     hey: (name) => `Olá, ${name}`,
     choiceSubtitle: "Entre na sala de um amigo ou crie a sua.",
+    yourRooms: "Suas salas",
     hostRoom: "Criar uma sala",
     joinRoom: "Entrar com código",
     back: "Voltar",

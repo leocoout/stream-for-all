@@ -11,6 +11,14 @@ export function Onboarding(mount, opts = {}) {
   };
 
   const api = {
+    start() {
+      if (!state.nickname) {
+        api.nickname();
+        return;
+      }
+      if (opts.startInvite) opts.onJoin(state.nickname, opts.startInvite);
+      else api.choice();
+    },
     nickname() {
       show(StepNickname({
         initialName: state.nickname,
@@ -27,6 +35,8 @@ export function Onboarding(mount, opts = {}) {
       show(StepChoice({
         name: state.nickname,
         color: state.color,
+        rooms: opts.rooms || [],
+        onEnterRoom: opts.onEnterRoom,
         onJoin: () => api.join(),
         onHost: () => opts.onHost(state.nickname),
         onBack: () => api.nickname()
