@@ -21,7 +21,7 @@ import { loadGroups, saveGroup, deleteGroup, createHostGroup, joinFromInvite } f
 import { MOCK_NAMES, MOCK_COLORS, MOCK_PRESETS, installChromeStub, clampScene, mockStream } from "./mock.js";
 import { T } from "./strings.js";
 import { LINKS } from "./config.js";
-import { streamMenuItems, initStreamQuality, boostBitrate } from "./streamQuality.js";
+import { streamMenuItems, initStreamQuality, applySenderParams, applyContentHint } from "./streamQuality.js";
 
 let gearBtn = null;
 let roomChromeReady = false;
@@ -205,10 +205,11 @@ async function enterGroup(g) {
     if (!info || !members.has(info.pubId) || !localStream) return;
     if (msg.want) {
       watchers.add(peerId);
-      Promise.all([].concat(room.addStream(localStream, { target: peerId }))).then(() => boostBitrate(room)).catch(() => {});
+      Promise.all([].concat(room.addStream(localStream, { target: peerId }))).then(() => applySenderParams(room, watchers.size)).catch(() => {});
     } else {
       watchers.delete(peerId);
       try { room.removeStream(localStream, { target: peerId }); } catch {}
+      applySenderParams(room, watchers.size);
     }
     broadcastViewers();
   };
@@ -268,7 +269,7 @@ async function enterGroup(g) {
       pingMs.delete(info.pubId);
       stopWatch(info.pubId, true);
     }
-    watchers.delete(peerId);
+    if (watchers.delete(peerId) && localStream) applySenderParams(room, watchers.size);
     peerPub.delete(peerId);
     myNonce.delete(peerId);
     for (const [pub, v] of pendingApprovals) if (v.peerId === peerId) pendingApprovals.delete(pub);
@@ -356,6 +357,7 @@ shareBtn.onclick = async () => {
   } catch {
     return;
   }
+  applyContentHint(localStream);
   attachVideo("me", T.room.you(group.myName), localStream, true);
   updateTileViewers(id.pubId);
   liveMembers.add(id.pubId);
