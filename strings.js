@@ -62,6 +62,7 @@ export const T = {
     openInWindow: "Abrir em uma janela separada",
     close: "Fechar",
     signalingFailed: "Falha ao iniciar a sinalização: ",
+    relaysBlocked: "Sem conexão com os servidores de sinalização. Verifique a rede ou o firewall.",
     status: (total, online) =>
       `${total} ${total === 1 ? "membro" : "membros"} · ${online} online com você`
   }

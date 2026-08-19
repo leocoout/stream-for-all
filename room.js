@@ -1,4 +1,4 @@
-import { joinRoom } from "./trystero-nostr.min.js";
+import { joinRoom, getRelaySockets } from "./trystero-nostr.min.js";
 import {
   loadIdentity, saveName, signStr, verifyStr, makeEntry, mergeEntries,
   computeMembers, makeInviteCode, parseInviteCode, deriveRoomTopic, randId, verifyEntry
@@ -32,7 +32,11 @@ const RELAYS = [
   "wss://nos.lol",
   "wss://relay.nostr.band",
   "wss://relay.primal.net",
-  "wss://nostr.mom"
+  "wss://nostr.mom",
+  "wss://relay.nostr.net",
+  "wss://nostr.land",
+  "wss://nostr21.com",
+  "wss://nostr-pub.wellorder.net"
 ];
 
 const el = (id) => document.getElementById(id);
@@ -158,6 +162,12 @@ async function enterGroup(g) {
     statusEl.textContent = T.room.signalingFailed + (err?.message || err);
     return;
   }
+
+  setTimeout(() => {
+    const sockets = Object.values(getRelaySockets() || {});
+    const open = sockets.filter((s) => s?.readyState === 1).length;
+    if (open === 0) statusEl.textContent = T.room.relaysBlocked;
+  }, 10_000);
 
   const chal = room.makeAction("chal");
   const proof = room.makeAction("proof");
