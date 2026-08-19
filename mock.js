@@ -11,7 +11,9 @@ export const MOCK_PRESETS = {
 };
 
 export function installChromeStub() {
-  const mem = {};
+  let mem = {};
+  try { mem = JSON.parse(localStorage.getItem("sfa-storage")) || {}; } catch {}
+  const persist = () => { try { localStorage.setItem("sfa-storage", JSON.stringify(mem)); } catch {} };
   globalThis.chrome = globalThis.chrome || {};
   chrome.storage = {
     local: {
@@ -20,7 +22,7 @@ export function installChromeStub() {
         if (Array.isArray(k)) { const o = {}; for (const x of k) o[x] = mem[x]; return o; }
         return { ...mem };
       },
-      set: async (o) => { Object.assign(mem, o); }
+      set: async (o) => { Object.assign(mem, o); persist(); }
     }
   };
   chrome.runtime = chrome.runtime || { getURL: (p) => p };

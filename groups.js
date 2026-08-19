@@ -10,6 +10,12 @@ export async function saveGroup(g) {
   await chrome.storage.local.set({ "sfa-groups": groups });
 }
 
+export async function deleteGroup(groupId) {
+  const groups = await loadGroups();
+  delete groups[groupId];
+  await chrome.storage.local.set({ "sfa-groups": groups });
+}
+
 export async function createHostGroup(id, name, ctx) {
   const groupId = randId();
   const g = {

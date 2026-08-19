@@ -28,10 +28,8 @@ export function LiveBadge() {
   const b = baseBadge();
   b.style.background = "var(--destructive)";
   b.style.color = "#fff";
-  const dot = document.createElement("span");
-  Object.assign(dot.style, { width: "6px", height: "6px", borderRadius: "50%", background: "#fff" });
   const text = document.createElement("span");
   text.textContent = T.room.live;
-  b.append(dot, text);
+  b.append(text);
   return b;
 }

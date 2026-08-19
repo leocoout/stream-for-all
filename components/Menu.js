@@ -59,7 +59,7 @@ export function openMenu(anchor, itemsOrBuilder) {
     Object.assign(row.style, {
       display: "flex", alignItems: "center", gap: "9px", width: "100%",
       padding: "8px 10px", border: "none", background: "transparent",
-      color: "var(--fg)",
+      color: it.danger ? "var(--destructive)" : "var(--fg)",
       fontSize: "13px", fontWeight: "500", cursor: "pointer",
       borderRadius: "var(--radius-sm)", fontFamily: "var(--font-sans)", textAlign: "left"
     });

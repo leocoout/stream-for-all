@@ -6,7 +6,7 @@ import {
 import { Onboarding } from "./onboarding.js";
 import { MemberRow } from "./components/MemberRow.js";
 import { ApprovalRow } from "./components/ApprovalRow.js";
-import { initVideoGrid, attachVideo, removeVideo, updateEmpty } from "./videoGrid.js";
+import { initVideoGrid, attachVideo, removeVideo, clearVideos, updateEmpty, toggleGridView, setPendingLive } from "./videoGrid.js";
 import { IconButton } from "./components/IconButton.js";
 import { openMenu } from "./components/Menu.js";
 import { LiveBlock } from "./components/LiveBlock.js";
@@ -16,7 +16,8 @@ import { BgPattern } from "./components/BgPattern.js";
 import { FooterMeta } from "./components/FooterMeta.js";
 import { toast } from "./components/Toast.js";
 import { renderDevPanel } from "./components/DevPanel.js";
-import { loadGroups, saveGroup, createHostGroup, joinFromInvite } from "./groups.js";
+import { renderMemberSidebar } from "./components/MemberSidebar.js";
+import { loadGroups, saveGroup, deleteGroup, createHostGroup, joinFromInvite } from "./groups.js";
 import { MOCK_NAMES, MOCK_COLORS, MOCK_PRESETS, installChromeStub, clampScene, mockStream } from "./mock.js";
 import { T } from "./strings.js";
 import { LINKS } from "./config.js";
@@ -43,6 +44,7 @@ for (const [wrap, maxWidth] of [[onboardWrap, "340px"], [roomPanel, "400px"]]) {
   Object.assign(footer.style, {
     width: "100%", maxWidth, marginTop: "12px", padding: "0 6px", boxSizing: "border-box"
   });
+  if (wrap === roomPanel) footer.id = "room-footer";
   wrap.appendChild(footer);
 }
 const grid = el("grid");
@@ -86,7 +88,7 @@ const MOCK = params.has("mock");
 let scene = null;
 if (typeof chrome === "undefined" || !chrome.storage) installChromeStub();
 initStreamQuality(() => localStream);
-initVideoGrid({ grid, emptyHint, thumbs });
+initVideoGrid({ grid, emptyHint, thumbs, roomCard: el("room-card"), zoomStage: el("zoom-stage") });
 
 init();
 
@@ -161,7 +163,14 @@ async function enterGroup(g) {
   const watch = room.makeAction("watch");
   const viewers = room.makeAction("view");
   const pings = room.makeAction("pings");
-  actions = { chal, rost, live, watch, viewers, pings };
+  const end = room.makeAction("end");
+  actions = { chal, rost, live, watch, viewers, pings, end };
+
+  end.onMessage = (msg, { peerId }) => {
+    const info = peerPub.get(peerId);
+    if (!info || info.pubId !== group.founderPub) return;
+    exitRoom(T.room.roomEnded);
+  };
 
   pings.onMessage = (msg, { peerId }) => {
     const info = peerPub.get(peerId);
@@ -407,9 +416,10 @@ function stopWatch(pub, silent = false) {
 }
 
 function attachWatched(pub, name, stream) {
-  attachVideo("watch-" + pub, name, stream, false);
-  const tile = el("tile-watch-" + pub);
-  if (tile) { tile.style.cursor = "pointer"; tile.title = T.room.stopWatching; tile.onclick = () => stopWatch(pub); }
+  attachVideo("watch-" + pub, name, stream, false, {
+    onStop: () => stopWatch(pub),
+    zoomable: true
+  });
   updateTileViewers(pub);
 }
 
@@ -441,12 +451,27 @@ function renderLive() {
     const name = members.get(pub) || "friend";
     thumbs.appendChild(LiveBlock({ name, pub, onWatch: () => startWatch(pub) }));
   }
+  setPendingLive(pending.map((pub) => ({
+    pub, name: members.get(pub) || "friend", onWatch: () => startWatch(pub)
+  })));
+  renderSidebar();
   updateEmpty();
 }
 
 function renderMembers() {
   if (membersBtn) membersBtn.title = `${T.room.members} (${members.size})`;
   if (openSheetKind === "members" && isSheetOpen()) openMembersSheet();
+  renderSidebar();
+}
+
+function renderSidebar() {
+  if (!group || !id) return;
+  renderMemberSidebar(el("member-list"), {
+    members, liveMembers, watching,
+    online: new Set([...peerPub.values()].map((v) => v.pubId)),
+    mePub: id.pubId, hostPub: group.founderPub, pingMs,
+    onWatch: startWatch, onStop: stopWatch
+  });
 }
 
 function renderApprovals() {
@@ -495,6 +520,8 @@ function setupRoomChrome() {
   if (roomChromeReady) return;
   roomChromeReady = true;
   const actionsWrap = el("header-actions");
+  const gridBtn = IconButton("layout-grid", { title: T.room.gridView, onClick: () => toggleGridView() });
+  actionsWrap.appendChild(gridBtn);
   membersBtn = IconButton("users", { title: T.room.members, onClick: openMembersSheet });
   invitesBtn = IconButton("user-plus", { title: T.room.requests, onClick: openApprovalsSheet });
   invitesBtn.hidden = true;
@@ -507,13 +534,40 @@ function setupRoomChrome() {
 
 function updateStreamControls() {
   if (gearBtn) gearBtn.hidden = !localStream;
+  const slot = el("stream-settings-slot");
+  if (slot) slot.hidden = !localStream;
 }
 
 function roomMenuItems() {
+  const amHost = id.pubId === group.founderPub;
   return [
     { label: T.room.sound, selected: soundEnabled(), keepOpen: true, onClick: () => setSoundEnabled(!soundEnabled()) },
-    { label: T.room.copyInvite, onClick: copyInvite }
+    { label: T.room.copyInvite, onClick: copyInvite },
+    { label: amHost ? T.room.endRoom : T.room.leaveRoom, danger: true, onClick: leaveRoom }
   ];
+}
+
+async function leaveRoom() {
+  const amHost = id.pubId === group.founderPub;
+  if (!confirm(amHost ? T.room.endRoomConfirm : T.room.leaveRoomConfirm)) return;
+  if (amHost && !MOCK) {
+    try { await actions.end.send({}); } catch {}
+  }
+  await exitRoom();
+}
+
+async function exitRoom(message) {
+  stopShare();
+  if (!MOCK) {
+    try { room?.leave(); } catch {}
+    room = null;
+    await deleteGroup(group.groupId);
+  }
+  if (message) toast(message);
+  setTimeout(() => {
+    window.close();
+    location.href = "room.html";
+  }, message ? 1500 : 0);
 }
 
 
@@ -565,7 +619,7 @@ function applyScene() {
   mockStreams.clear();
   viewersByStreamer.clear();
   pingMs.clear();
-  grid.innerHTML = "";
+  clearVideos();
   localStream = null;
   shareBtn.textContent = T.room.shareScreen;
   shareBtn.classList.remove("danger");
