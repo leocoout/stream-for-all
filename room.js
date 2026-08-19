@@ -20,7 +20,7 @@ import { renderMemberSidebar } from "./components/MemberSidebar.js";
 import { loadGroups, saveGroup, deleteGroup, createHostGroup, joinFromInvite } from "./groups.js";
 import { MOCK_NAMES, MOCK_COLORS, MOCK_PRESETS, installChromeStub, clampScene, mockStream } from "./mock.js";
 import { T } from "./strings.js";
-import { LINKS, CUSTOM_RELAY } from "./config.js";
+import { LINKS, CUSTOM_RELAY, TURN_SERVERS } from "./config.js";
 import { streamMenuItems, initStreamQuality, applySenderParams, applyContentHint } from "./streamQuality.js";
 
 let gearBtn = null;
@@ -157,7 +157,7 @@ async function enterGroup(g) {
   let topic;
   try {
     topic = await deriveRoomTopic(APP_ID, group.groupId);
-    room = joinRoom({ appId: APP_ID, password: group.groupSecret, relayConfig: { urls: RELAYS } }, topic);
+    room = joinRoom({ appId: APP_ID, password: group.groupSecret, relayConfig: { urls: RELAYS }, turnConfig: TURN_SERVERS }, topic);
   } catch (err) {
     statusEl.textContent = T.room.signalingFailed + (err?.message || err);
     return;

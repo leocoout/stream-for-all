@@ -27,7 +27,7 @@ export const T = {
     empty: "Ninguém está transmitindo ainda.",
     shareScreen: "Compartilhar tela",
     stopSharing: "Parar de compartilhar",
-    waiting: "Aguardando aprovação...",
+    waiting: "Aguardando aprovação... Mantenha as duas janelas abertas e visíveis.",
     you: (name) => `${name} (você)`,
     members: "Membros",
     requests: "Pedidos para entrar",
