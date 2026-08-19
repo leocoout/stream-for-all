@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Stream for All",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Private P2P screen-sharing rooms. Safely stream your screen to friends in your server, with no media servers in between.",
   "permissions": [
     "storage",
