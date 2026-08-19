@@ -20,7 +20,7 @@ import { renderMemberSidebar } from "./components/MemberSidebar.js";
 import { loadGroups, saveGroup, deleteGroup, createHostGroup, joinFromInvite } from "./groups.js";
 import { MOCK_NAMES, MOCK_COLORS, MOCK_PRESETS, installChromeStub, clampScene, mockStream } from "./mock.js";
 import { T } from "./strings.js";
-import { LINKS } from "./config.js";
+import { LINKS, CUSTOM_RELAY } from "./config.js";
 import { streamMenuItems, initStreamQuality, applySenderParams, applyContentHint } from "./streamQuality.js";
 
 let gearBtn = null;
@@ -28,13 +28,13 @@ let roomChromeReady = false;
 
 const APP_ID = "stream-for-all-v1";
 const RELAYS = [
+  ...(CUSTOM_RELAY ? [CUSTOM_RELAY] : []),
   "wss://relay.damus.io",
   "wss://nos.lol",
   "wss://relay.nostr.band",
   "wss://relay.primal.net",
   "wss://nostr.mom",
   "wss://relay.nostr.net",
-  "wss://nostr-pub.wellorder.net",
   "wss://nostr.data.haus",
   "wss://nostr.vulpem.com"
 ];
