@@ -25,16 +25,29 @@ export class RelayRoom {
         headers: { "Content-Type": "application/nostr+json", "Access-Control-Allow-Origin": "*" }
       });
     }
+    if (this.state.getWebSockets().length >= 64) {
+      return new Response("relay full", { status: 503 });
+    }
     const pair = new WebSocketPair();
     this.state.acceptWebSocket(pair[1]);
-    pair[1].serializeAttachment({ subs: {} });
+    pair[1].serializeAttachment({ subs: {}, winStart: 0, winCount: 0 });
     return new Response(null, { status: 101, webSocket: pair[0] });
   }
 
   webSocketMessage(ws, raw) {
+    if (typeof raw !== "string" || raw.length > 16384) return;
     let msg;
     try { msg = JSON.parse(raw); } catch { return; }
-    const att = ws.deserializeAttachment() || { subs: {} };
+    const att = ws.deserializeAttachment() || { subs: {}, winStart: 0, winCount: 0 };
+
+    const now = Date.now();
+    if (now - att.winStart > 10_000) { att.winStart = now; att.winCount = 0; }
+    att.winCount++;
+    ws.serializeAttachment(att);
+    if (att.winCount > 60) {
+      if (att.winCount > 200) { try { ws.close(1008, "rate limit"); } catch {} }
+      return;
+    }
 
     if (msg[0] === "EVENT") {
       const ev = msg[1];
