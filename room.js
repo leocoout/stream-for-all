@@ -169,6 +169,19 @@ async function enterGroup(g) {
     if (open === 0) statusEl.textContent = T.room.relaysBlocked;
   }, 10_000);
 
+  setInterval(() => {
+    if (!room) return;
+    const sockets = Object.values(getRelaySockets() || {});
+    const open = sockets.filter((s) => s?.readyState === 1).length;
+    const p = room.getPeers();
+    const pcs = p instanceof Map ? [...p.values()] : Object.values(p);
+    const states = pcs.map((pc) => pc.connectionState);
+    console.log(`[sfa] relays ${open}/${sockets.length} · peers [${states.join(", ") || "none"}] · auth ${peerPub.size} · pending ${pendingApprovals.size}`);
+    if (!members.has(id.pubId) && !waitingEl.hidden) {
+      waitingEl.textContent = `${T.room.waiting} (relays ${open}/${sockets.length}, conexões ${states.length ? states.join(", ") : "0"})`;
+    }
+  }, 3000);
+
   const chal = room.makeAction("chal");
   const proof = room.makeAction("proof");
   const rost = room.makeAction("rost");
