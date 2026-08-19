@@ -31,7 +31,9 @@ export function initVideoGrid(refs) {
 export function attachVideo(key, label, stream, muted = false, { onStop = null, zoomable = false } = {}) {
   const existing = document.getElementById("tile-" + key);
   if (existing) {
-    existing.querySelector("video").srcObject = stream;
+    const v = existing.querySelector("video");
+    v.srcObject = stream;
+    v.play().catch(() => {});
     return;
   }
   const tile = VideoTile({

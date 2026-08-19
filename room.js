@@ -416,10 +416,15 @@ function stopWatch(pub, silent = false) {
 }
 
 function attachWatched(pub, name, stream) {
-  attachVideo("watch-" + pub, name, stream, false, {
+  const liveTracks = () => new MediaStream(stream.getTracks().filter((t) => t.readyState === "live"));
+  attachVideo("watch-" + pub, name, liveTracks(), false, {
     onStop: () => stopWatch(pub),
     zoomable: true
   });
+  stream.onaddtrack = () => {
+    const v = el("tile-watch-" + pub)?.querySelector("video");
+    if (v) { v.srcObject = liveTracks(); v.play().catch(() => {}); }
+  };
   updateTileViewers(pub);
 }
 
